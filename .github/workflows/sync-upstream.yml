@@ -1,0 +1,50 @@
+name: Sync Main with Upstream
+
+on:
+  schedule:
+    # Run every day at 03:00 UTC
+    - cron: "0 3 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Sync fork with upstream
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream repository
+        run: |
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream https://github.com/MoroccoAPI/MoroccoAPI.git
+
+      - name: Fetch upstream
+        run: |
+          git fetch upstream main
+
+      - name: Sync main
+        run: |
+          git merge --ff-only upstream/main
+
+      - name: Push updated main
+        run: |
+          git push origin main
+
+      - name: Show synchronization status
+        run: |
+          echo "Local main:    $(git rev-parse HEAD)"
+          echo "Upstream main: $(git rev-parse upstream/main)"
