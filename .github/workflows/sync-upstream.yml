@@ -2,7 +2,6 @@ name: Sync Main with Upstream
 
 on:
   schedule:
-    # Run every day at 03:00 UTC
     - cron: "0 3 * * *"
 
   workflow_dispatch:
@@ -27,7 +26,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Add upstream repository
+      - name: Add upstream
         run: |
           git remote remove upstream 2>/dev/null || true
           git remote add upstream https://github.com/MoroccoAPI/MoroccoAPI.git
@@ -36,15 +35,15 @@ jobs:
         run: |
           git fetch upstream main
 
-      - name: Sync main
+      - name: Merge upstream into main
         run: |
-          git merge --ff-only upstream/main
+          git merge --no-ff --no-edit upstream/main
 
-      - name: Push updated main
+      - name: Push synchronized main
         run: |
           git push origin main
 
-      - name: Show synchronization status
+      - name: Show status
         run: |
-          echo "Local main:    $(git rev-parse HEAD)"
+          echo "Your main:    $(git rev-parse HEAD)"
           echo "Upstream main: $(git rev-parse upstream/main)"
